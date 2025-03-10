@@ -321,7 +321,7 @@ const HeroBanner = () => {
                     // label="You"
                     icon={{
                       url: "/Navigator.png",
-                      scaledSize: new google.maps.Size(30, 30),
+                     scaledSize: { width: 30, height: 30 } as any,
                     }}
                   />
                 )}
