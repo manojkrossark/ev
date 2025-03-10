@@ -550,6 +550,57 @@ const HeroBanner = () => {
                     padding: "20px",
                   }}
                 >
+<div style={{ display: "flex", gap: "15px" }}>
+                    {/* AI Recommendation */}
+                    {aiRecommendation?.weather?.temperature && (
+                      <>
+                                           <div className="flex justify-center mt-4"  style={{
+                             
+                              backgroundColor: "black",
+                              color: "white",
+                              borderRadius: "20px",
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                              marginBottom:"30px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                            }}>
+<button className="btn btn-dark btn-sm rounded-pill d-flex align-items-center fw-bold">
+🌤 {aiRecommendation.weather.temperature}°C
+</button>
+</div>
+<div className="flex justify-center mt-4"  style={{
+                             
+                             backgroundColor: "#FF8c00",
+                             color: "white",
+                             fontWeight:"bold",
+                             borderRadius: "20px",
+                             fontSize: "14px",
+                             fontWeight: "bold",
+                             marginBottom:"30px",
+                             display: "flex",
+                             alignItems: "center",
+                             gap: "5px",
+                             boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                           }}>
+<button className="btn btn-sm rounded-pill d-flex align-items-center fw-bold text-white">
+<i className="bi bi-battery-half" style={{ fontWeight: "bold",fontSize:"25px" }} aria-hidden="true"></i>&nbsp;70%
+</button>
+</div>     
+
+
+
+
+                    </>
+                    )}
+     
+                    {/* </div> */}
+
+                    {/* Weather Conditions */}
+                  
+                  </div>
                   <div style={{ display: "flex", gap: "15px" }}>
                     {/* AI Recommendation */}
                     {!isLoading && aiRecommendation && (
@@ -565,28 +616,7 @@ const HeroBanner = () => {
                           boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
                         }}
                       >
-                        {/* Weather Badge */}
-                        {aiRecommendation?.weather?.temperature && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "-18px",
-                              backgroundColor: "black",
-                              color: "white",
-                              padding: "5px 10px",
-                              borderRadius: "20px",
-                              fontSize: "14px",
-                              fontWeight: "bold",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
-                            }}
-                          >
-                            <span style={{ fontSize: "16px" }}>🌤</span>
-                            {aiRecommendation.weather.temperature}°C
-                          </div>
-                        )}
+              
 
                         <h5
                           style={{
