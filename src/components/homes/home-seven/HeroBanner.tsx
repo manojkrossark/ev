@@ -15,6 +15,7 @@ import { BASE_API_URL } from "@/utils/constants";
 import Image from "next/image";
 
 import dashboardIcon_1 from "@/assets/images/dashboard/icon/icon_43.svg";
+import loadingSpinner from "../../../../public/icons8-loading-48.png";
 
 const HeroBanner = () => {
   const API_URL = `${BASE_API_URL}api/allocate-charging`;
@@ -95,6 +96,7 @@ const HeroBanner = () => {
     if (!location) return;
     try {
       setIsLoading(true);
+      setAiRecommendation(null);
       const response = await axios.post(API_URL, {
         latitude: location.lat,
         longitude: location.lng,
@@ -183,7 +185,7 @@ const HeroBanner = () => {
     });
   };
   return (
-    <div className="hero-banner-seven position-relative">
+    <div className="hero-banner-seven position-relative mt-120 lg-mt-100">
       <style>
         {`
           .search-container {
@@ -220,7 +222,7 @@ const HeroBanner = () => {
 
           .search-wrapper {
             position: absolute;
-            top: 100px; /* Adjust spacing */
+            top: 20px; /* Adjust spacing */
             right: 20px; /* Aligns to the right */
             display: flex;
             justify-content: flex-end; /* Pushes it to the right */
@@ -228,12 +230,31 @@ const HeroBanner = () => {
             z-index: 1000; /* Ensures it stays above the map */
           }
 
+          .search-icon, .loading-icon {
+            width: 20px; /* Ensure size is proper */
+            height: 20px;
+            display: block; /* Ensure it's visible */
+          }
+
+          .loading-icon {
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+
           @media (max-width: 768px) {
             .search-wrapper {
-              left: 50%;
-              transform: translateX(-50%);
-              right: auto;
-            }
+          left: 35%;
+          transform: translateX(-50%);
+          right: auto;
+          width: 90%; /* Ensures it's wide enough */
+          max-width: 350px; /* Adjust if needed */
+  }
           }
         `}
       </style>
@@ -265,11 +286,19 @@ const HeroBanner = () => {
                       className="search-input"
                     />
                     <button type="submit" className="search-button">
-                      <Image
-                        src={dashboardIcon_1}
-                        alt="Search Icon"
-                        className="search-icon"
-                      />
+                      {isLoading ? (
+                        <Image
+                          src={loadingSpinner}
+                          alt="Loading..."
+                          className="loading-icon"
+                        />
+                      ) : (
+                        <Image
+                          src={dashboardIcon_1}
+                          alt="Search Icon"
+                          className="search-icon"
+                        />
+                      )}
                     </button>
                   </div>
                 </Autocomplete>
@@ -292,7 +321,7 @@ const HeroBanner = () => {
                     // label="You"
                     icon={{
                       url: "/Navigator.png",
-                      scaledSize: { width: 30, height: 30 } as any,
+                      scaledSize: new google.maps.Size(30, 30),
                     }}
                   />
                 )}
@@ -376,20 +405,20 @@ const HeroBanner = () => {
                     key={index}
                     path={route.path}
                     options={{
-                      strokeOpacity: 0, // Hide solid line
+                      strokeOpacity: 1, // Hide solid line
                       strokeWeight: 4,
-                      icons: [
-                        {
-                          icon: {
-                            path: "M 0,-1.5 L 0,1.5", // Small dash segment
-                            strokeOpacity: 1,
-                            scale: 2.5, // Dash thickness
-                            strokeColor: "black",
-                          },
-                          offset: "0",
-                          repeat: "20px", // Increase for larger gaps
-                        },
-                      ],
+                      // icons: [
+                      //   {
+                      //     icon: {
+                      //       path: "M 0,-1.5 L 0,1.5", // Small dash segment
+                      //       strokeOpacity: 1,
+                      //       scale: 3, // Dash thickness
+                      //       strokeColor: "black",
+                      //     },
+                      //     offset: "0",
+                      //     repeat: "10px", // Increase for larger gaps
+                      //   },
+                      // ],
                     }}
                   />
                 ))}
@@ -413,7 +442,7 @@ const HeroBanner = () => {
                 >
                   <div style={{ display: "flex", gap: "15px" }}>
                     {/* AI Recommendation */}
-                    {aiRecommendation && (
+                    {!isLoading && aiRecommendation && (
                       <div
                         style={{
                           width: "250px",
@@ -437,87 +466,90 @@ const HeroBanner = () => {
                         <p style={{ fontSize: "14px", color: "#333" }}>
                           ⏳ Best Time:{" "}
                           <span style={{ fontWeight: "bold", color: "black" }}>
-                            {aiRecommendation.best_time_to_charge}
+                            {aiRecommendation?.best_time_to_charge}
                           </span>
                         </p>
                         <p style={{ fontSize: "14px", color: "#333" }}>
                           🚦 Peak Hours:{" "}
                           <span style={{ fontWeight: "bold", color: "black" }}>
-                            {aiRecommendation.peak_hours.join(", ")}
+                            {aiRecommendation?.peak_hours?.join(", ")}
                           </span>
                         </p>
                       </div>
                     )}
-                    {aiRecommendation?.top_3_stations?.map((station, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          position: "relative", // Enables positioning for the index circle
-                          width: "250px",
-                          minWidth: "250px",
-                          padding: "15px",
-                          border: "1px solid #ccc",
-                          borderRadius: "10px",
-                          background: "#fff",
-                          boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        {/* Numbered Circle */}
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "-15px",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            width: "30px",
-                            height: "30px",
-                            borderRadius: "50%",
-                            backgroundColor: "black",
-                            color: "white",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            fontSize: "14px",
-                            fontWeight: "bold",
-                            boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
-                          }}
-                        >
-                          {index + 1}
-                        </div>
+                    {!isLoading &&
+                      aiRecommendation?.top_3_stations?.map(
+                        (station, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              position: "relative", // Enables positioning for the index circle
+                              width: "250px",
+                              minWidth: "250px",
+                              padding: "15px",
+                              border: "1px solid #ccc",
+                              borderRadius: "10px",
+                              background: "#fff",
+                              boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
+                              textAlign: "center",
+                            }}
+                          >
+                            {/* Numbered Circle */}
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "-15px",
+                                left: "50%",
+                                transform: "translateX(-50%)",
+                                width: "30px",
+                                height: "30px",
+                                borderRadius: "50%",
+                                backgroundColor: "black",
+                                color: "white",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                fontSize: "14px",
+                                fontWeight: "bold",
+                                boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                              }}
+                            >
+                              {index + 1}
+                            </div>
 
-                        {/* Station Info */}
-                        <h6
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: "bold",
-                            color: "black",
-                            marginTop: "10px",
-                          }}
-                        >
-                          {station.name
-                            .replace(/Charging Station/gi, "")
-                            .trim()}
-                        </h6>
-                     
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                         Location: {station.location}
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333", fontWeight: "bold"}}>
-                        <b><i className="bi bi-currency-rupee"></i></b> Price per kWh: ₹{station.price_per_kwh}
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                        <b><i className="bi bi-geo-alt"></i></b>Distance: {station.user_distance_km} km
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                         <b><i className="bi bi-alarm"></i></b> Travel Time: {station.estimated_travel_time_min}{" "}
-                          mins
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                        <b><i className="bi bi-currency-rupee"></i></b> Cost for 10kWh: ₹{station.estimated_cost_for_10kWh}
-                        </p>
-                      </div>
-                    ))}
+                            {/* Station Info */}
+                            <h6
+                              style={{
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                color: "black",
+                                marginTop: "10px",
+                              }}
+                            >
+                              {station.name
+                                .replace(/Charging Station/gi, "")
+                                .trim()}
+                            </h6>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              📍 Location: {station.address}
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              💰 Price per kWh: ₹{station.price_per_kwh}
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              🚗 Distance: {station.user_distance_km} km
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              ⏳ Travel Time:{" "}
+                              {station.estimated_travel_time_min} mins
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              ⚡ Cost for 10kWh: ₹
+                              {station.estimated_cost_for_10kWh}
+                            </p>
+                          </div>
+                        )
+                      )}
                     {/* </div> */}
 
                     {/* Weather Conditions */}
