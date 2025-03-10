@@ -530,23 +530,22 @@ const HeroBanner = () => {
                                 .replace(/Charging Station/gi, "")
                                 .trim()}
                             </h6>
-                            <p style={{ fontSize: "14px", color: "#333" }}>
-                              📍 Location: {station.address}
-                            </p>
-                            <p style={{ fontSize: "14px", color: "#333" }}>
-                              💰 Price per kWh: ₹{station.price_per_kwh}
-                            </p>
-                            <p style={{ fontSize: "14px", color: "#333" }}>
-                              🚗 Distance: {station.user_distance_km} km
-                            </p>
-                            <p style={{ fontSize: "14px", color: "#333" }}>
-                              ⏳ Travel Time:{" "}
-                              {station.estimated_travel_time_min} mins
-                            </p>
-                            <p style={{ fontSize: "14px", color: "#333" }}>
-                              ⚡ Cost for 10kWh: ₹
-                              {station.estimated_cost_for_10kWh}
-                            </p>
+                                     <p style={{ fontSize: "16px", color: "#333" }}>
+                         Location: {station.address}
+                        </p>
+                        <p style={{ fontSize: "16px", color: "#333", fontWeight: "bold"}}>
+                        <b><i className="bi bi-currency-rupee"></i></b> Price per kWh: ₹{station.price_per_kwh}
+                        </p>
+                        <p style={{ fontSize: "16px", color: "#333" }}>
+                        <b><i className="bi bi-geo-alt"></i></b>Distance: {station.user_distance_km} km
+                        </p>
+                        <p style={{ fontSize: "16px", color: "#333" }}>
+                         <b><i className="bi bi-alarm"></i></b> Travel Time: {station.estimated_travel_time_min}{" "}
+                          mins
+                        </p>
+                        <p style={{ fontSize: "16px", color: "#333" }}>
+                        <b><i className="bi bi-currency-rupee"></i></b> Cost for 10kWh: ₹{station.estimated_cost_for_10kWh}
+                        </p>
                           </div>
                         )
                       )}
