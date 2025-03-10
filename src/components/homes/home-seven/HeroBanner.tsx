@@ -349,7 +349,7 @@ const HeroBanner = () => {
             width={80}
             height={80}
           />
-          <p className="loading-text">Fetching data, please wait...</p>
+          <p className="loading-text">Fetching your location, please wait...</p>
         </div>
       )}
       <div id="" className="h-100">
