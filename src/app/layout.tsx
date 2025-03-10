@@ -14,12 +14,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={isDev}>
       <head>
-        <meta name="keywords" content="Real estate, Property sale, Property buy" />
-        <meta name="description" content="Homy is a beautiful website template designed for Real Estate Agency." />
-        <meta property="og:site_name" content="Homy" />
+        <meta name="keywords" content="Your Ev's Intelligent Assistant" />
+        <meta name="description" content="Alto - Your Ev's Intelligent Assistant" />
+        <meta property="og:site_name" content="Alto" />
         <meta property="og:url" content="https://creativegigstf.com" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="Homy - Real Estate React Next js Template" />
+        <meta property="og:title" content="Alto - Your Ev's Intelligent Assistant" />
         <meta name='og:image' content='images/assets/ogg.png' />
         {/* For IE  */}
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
