@@ -16,6 +16,8 @@ import Image from "next/image";
 
 import dashboardIcon_1 from "@/assets/images/dashboard/icon/icon_43.svg";
 import loadingSpinner from "../../../../public/icons8-loading-48.png";
+import refreshIcon from "../../../../public/circular-arrow.png";
+const LIBRARIES: "places"[] = ["places"];
 
 const HeroBanner = () => {
   const API_URL = `${BASE_API_URL}api/allocate-charging`;
@@ -63,6 +65,7 @@ const HeroBanner = () => {
     lng: 80.2575,
   });
   const [zoom, setZoom] = useState(12);
+  const [searchText, setSearchText] = useState("");
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<
     { path: { lat: number; lng: number }[]; color: string }[]
@@ -85,6 +88,34 @@ const HeroBanner = () => {
       { enableHighAccuracy: true }
     );
   }, []);
+
+  const fetchCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setLocation(newLocation); // Update state
+          setMapCenter(newLocation); // Move map to new location
+          setZoom(14);
+
+          setSearchText("");
+          if (autocompleteRef.current) {
+            autocompleteRef.current.set("place", null); // Reset Autocomplete
+          }
+        },
+        (error) => {
+          console.error("Error fetching location: ", error);
+          alert("Unable to fetch location. Please check location permissions.");
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
 
   useEffect(() => {
     if (location) {
@@ -129,7 +160,7 @@ const HeroBanner = () => {
     if (!autocompleteRef.current) return;
     const place = autocompleteRef.current.getPlace();
     if (!place || !place.geometry) return;
-
+    setSearchText(place?.name);
     const newLocation = {
       lat: place.geometry.location?.lat(),
       lng: place.geometry.location?.lng(),
@@ -236,6 +267,25 @@ const HeroBanner = () => {
             display: block; /* Ensure it's visible */
           }
 
+          .refresh-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.refresh-icon {
+  width: 22px;
+  height: 22px;
+  opacity: 0.7;
+}
+
+.refresh-button:hover .refresh-icon {
+  opacity: 1;
+  transform: rotate(180deg);
+  transition: 0.3s;
+}
+
           .loading-icon {
             width: 24px;
             height: 24px;
@@ -249,15 +299,59 @@ const HeroBanner = () => {
 
           @media (max-width: 768px) {
             .search-wrapper {
-          left: 35%;
+          left: 50%;
           transform: translateX(-50%);
           right: auto;
           width: 90%; /* Ensures it's wide enough */
           max-width: 350px; /* Adjust if needed */
   }
           }
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure it stays on top */
+}
+
+/* Pulsating Effect for the EV Charger Logo */
+.ev-charger-loader {
+  animation: pulse 1.5s infinite alternate;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; } /* Dim */
+  100% { opacity: 1; } /* Bright */
+}
+
+/* Loading text */
+.loading-text {
+  margin-top: 15px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
         `}
       </style>
+      {isLoading && (
+        <div className="loading-overlay">
+          <Image
+            src="/ev-charger-logo.webp"
+            alt="EV Charging"
+            className="ev-charger-loader"
+            width={80}
+            height={80}
+          />
+          <p className="loading-text">Fetching data, please wait...</p>
+        </div>
+      )}
       <div id="" className="h-100">
         <div
           className="google-map-home"
@@ -271,7 +365,7 @@ const HeroBanner = () => {
         <div className="p-6 flex flex-col gap-6 w-100 h-100">
           <LoadScriptNext
             googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-            libraries={["places"]}
+            libraries={LIBRARIES}
           >
             <>
               <div className="search-wrapper">
@@ -284,7 +378,10 @@ const HeroBanner = () => {
                       type="text"
                       placeholder="Search here.."
                       className="search-input"
+                      value={searchText} // Bind state
+                      onChange={(e) => setSearchText(e.target.value)}
                     />
+
                     <button type="submit" className="search-button">
                       {isLoading ? (
                         <Image
@@ -302,6 +399,18 @@ const HeroBanner = () => {
                     </button>
                   </div>
                 </Autocomplete>
+                <button
+                  type="button"
+                  className="refresh-button"
+                  onClick={fetchCurrentLocation}
+                  title="Refresh Location"
+                >
+                  <Image
+                    src={refreshIcon}
+                    alt="Refresh"
+                    className="refresh-icon"
+                  />
+                </button>
               </div>
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -326,16 +435,17 @@ const HeroBanner = () => {
                   />
                 )}
 
-                {aiRecommendation?.top_3_stations?.map((station, index) => {
-                  const [lat, lng] = station.location.split(", ").map(Number);
+                {aiRecommendation?.top_3_stations?.length > 0 &&
+                  aiRecommendation.top_3_stations.map((station, index) => {
+                    const [lat, lng] = station.location.split(", ").map(Number);
 
-                  return (
-                    <Fragment key={index}>
-                      {/* Marker with custom numbered circle */}
-                      <Marker
-                        position={{ lat, lng }}
-                        icon={{
-                          url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                    return (
+                      <Fragment key={index}>
+                        {/* Marker with custom numbered circle */}
+                        <Marker
+                          position={{ lat, lng }}
+                          icon={{
+                            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
                   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">
                     <circle cx="20" cy="20" r="16" fill="black" stroke="white" stroke-width="2"/>
                     <text x="50%" y="55%" font-size="14" font-weight="bold" fill="white" text-anchor="middle">
@@ -343,61 +453,61 @@ const HeroBanner = () => {
                     </text>
                   </svg>
                 `)}`,
-                          scaledSize: { width: 30, height: 30 } as any,
-                        }}
-                        onClick={() => setSelectedStation(station)}
-                      />
+                            scaledSize: { width: 30, height: 30 } as any,
+                          }}
+                          onClick={() => setSelectedStation(station)}
+                        />
 
-                      {/* Custom Tooltip with OverlayView */}
-                      {selectedStation?.location === station.location && (
-                        <OverlayView
-                          position={{ lat, lng }}
-                          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                        >
-                          <div
-                            style={{
-                              position: "relative",
-                              transform: "translate(-50%, -120%)",
-                            }}
+                        {/* Custom Tooltip with OverlayView */}
+                        {selectedStation?.location === station.location && (
+                          <OverlayView
+                            position={{ lat, lng }}
+                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                           >
-                            {/* Tooltip Box */}
                             <div
                               style={{
-                                backgroundColor: "white",
-                                color: "black",
-                                padding: "8px 14px",
-                                fontSize: "14px",
-                                fontWeight: "bold",
-                                // borderRadius: "20px",
-                                boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
-                                whiteSpace: "nowrap",
-                                display: "inline-block",
-                                textAlign: "center",
+                                position: "relative",
+                                transform: "translate(-50%, -120%)",
                               }}
                             >
-                              {station.name
-                                .replace(/Charging Station/gi, "")
-                                .trim()}
-                            </div>
+                              {/* Tooltip Box */}
+                              <div
+                                style={{
+                                  backgroundColor: "white",
+                                  color: "black",
+                                  padding: "8px 14px",
+                                  fontSize: "14px",
+                                  fontWeight: "bold",
+                                  // borderRadius: "20px",
+                                  boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                                  whiteSpace: "nowrap",
+                                  display: "inline-block",
+                                  textAlign: "center",
+                                }}
+                              >
+                                {station.name
+                                  .replace(/Charging Station/gi, "")
+                                  .trim()}
+                              </div>
 
-                            {/* Connector Line */}
-                            <div
-                              style={{
-                                width: "2px",
-                                height: "12px",
-                                backgroundColor: "black",
-                                position: "absolute",
-                                left: "50%",
-                                top: "100%",
-                                transform: "translateX(-50%)",
-                              }}
-                            ></div>
-                          </div>
-                        </OverlayView>
-                      )}
-                    </Fragment>
-                  );
-                })}
+                              {/* Connector Line */}
+                              <div
+                                style={{
+                                  width: "2px",
+                                  height: "12px",
+                                  backgroundColor: "black",
+                                  position: "absolute",
+                                  left: "50%",
+                                  top: "100%",
+                                  transform: "translateX(-50%)",
+                                }}
+                              ></div>
+                            </div>
+                          </OverlayView>
+                        )}
+                      </Fragment>
+                    );
+                  })}
 
                 {/* Render Plotted Routes */}
                 {routeCoordinates.map((route, index) => (
@@ -445,6 +555,7 @@ const HeroBanner = () => {
                     {!isLoading && aiRecommendation && (
                       <div
                         style={{
+                          position: "relative", // To allow positioning for the temperature badge
                           width: "250px",
                           minWidth: "250px",
                           padding: "15px",
@@ -454,6 +565,29 @@ const HeroBanner = () => {
                           boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
                         }}
                       >
+                        {/* Weather Badge */}
+                        {aiRecommendation?.weather?.temperature && (
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "-18px",
+                              backgroundColor: "black",
+                              color: "white",
+                              padding: "5px 10px",
+                              borderRadius: "20px",
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                            }}
+                          >
+                            <span style={{ fontSize: "16px" }}>🌤</span>
+                            {aiRecommendation.weather.temperature}°C
+                          </div>
+                        )}
+
                         <h5
                           style={{
                             fontSize: "18px",
@@ -477,6 +611,7 @@ const HeroBanner = () => {
                         </p>
                       </div>
                     )}
+
                     {!isLoading &&
                       aiRecommendation?.top_3_stations?.map(
                         (station, index) => (
@@ -530,29 +665,30 @@ const HeroBanner = () => {
                                 .replace(/Charging Station/gi, "")
                                 .trim()}
                             </h6>
-                                     <p style={{ fontSize: "16px", color: "#333" }}>
-                         Location: {station.address}
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333", fontWeight: "bold"}}>
-                        <b><i className="bi bi-currency-rupee"></i></b> Price per kWh: ₹{station.price_per_kwh}
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                        <b><i className="bi bi-geo-alt"></i></b>Distance: {station.user_distance_km} km
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                         <b><i className="bi bi-alarm"></i></b> Travel Time: {station.estimated_travel_time_min}{" "}
-                          mins
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
-                        <b><i className="bi bi-currency-rupee"></i></b> Cost for 10kWh: ₹{station.estimated_cost_for_10kWh}
-                        </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              📍 Location: {station.address}
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              💰 Price per kWh: ₹{station.price_per_kwh}
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              🚗 Distance: {station.user_distance_km} km
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              ⏳ Travel Time:{" "}
+                              {station.estimated_travel_time_min} mins
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              ⚡ Cost for 10kWh: ₹
+                              {station.estimated_cost_for_10kWh}
+                            </p>
                           </div>
                         )
                       )}
                     {/* </div> */}
 
                     {/* Weather Conditions */}
-                    {aiRecommendation?.weather && (
+                    {/* {aiRecommendation?.weather && (
                       <div
                         style={{
                           width: "250px",
@@ -587,7 +723,7 @@ const HeroBanner = () => {
                           ☀️ Condition: {aiRecommendation.weather.condition}
                         </p>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
