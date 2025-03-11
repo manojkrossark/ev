@@ -312,7 +312,7 @@ const HeroBanner = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */125
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -576,7 +576,7 @@ const HeroBanner = () => {
                         <div
                           className="flex justify-center mt-4"
                           style={{
-                            backgroundColor: "#FF8c00",
+                            backgroundColor: "#ff6725",
                             color: "white",
                             fontWeight: "bold",
                             borderRadius: "20px",
