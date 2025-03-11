@@ -299,7 +299,7 @@ const HeroBanner = () => {
 
           @media (max-width: 768px) {
             .search-wrapper {
-          left: 50%;
+          left: 35%;
           transform: translateX(-50%);
           right: auto;
           width: 90%; /* Ensures it's wide enough */
@@ -399,7 +399,7 @@ const HeroBanner = () => {
                     </button>
                   </div>
                 </Autocomplete>
-                <button
+                {/* <button
                   type="button"
                   className="refresh-button"
                   onClick={fetchCurrentLocation}
@@ -410,7 +410,7 @@ const HeroBanner = () => {
                     alt="Refresh"
                     className="refresh-icon"
                   />
-                </button>
+                </button> */}
               </div>
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -550,56 +550,60 @@ const HeroBanner = () => {
                     padding: "20px",
                   }}
                 >
-<div style={{ display: "flex", gap: "15px" }}>
+                  <div style={{ display: "flex", gap: "15px" }}>
                     {/* AI Recommendation */}
                     {aiRecommendation?.weather?.temperature && (
                       <>
-                                           <div className="flex justify-center mt-4"  style={{
-                             
-                              backgroundColor: "black",
-                              color: "white",
-                              borderRadius: "20px",
-                              fontSize: "14px",
-                              fontWeight: "bold",
-                              marginBottom:"30px",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "5px",
-                              boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
-                            }}>
-<button className="btn btn-dark btn-sm rounded-pill d-flex align-items-center fw-bold">
-🌤 {aiRecommendation.weather.temperature}°C
-</button>
-</div>
-<div className="flex justify-center mt-4"  style={{
-                             
-                             backgroundColor: "#FF8c00",
-                             color: "white",
-                             fontWeight:"bold",
-                             borderRadius: "20px",
-                             fontSize: "14px",
-                             fontWeight: "bold",
-                             marginBottom:"30px",
-                             display: "flex",
-                             alignItems: "center",
-                             gap: "5px",
-                             boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
-                           }}>
-<button className="btn btn-sm rounded-pill d-flex align-items-center fw-bold text-white">
-<i className="bi bi-battery-half" style={{ fontWeight: "bold",fontSize:"25px" }} aria-hidden="true"></i>&nbsp;70%
-</button>
-</div>     
-
-
-
-
-                    </>
+                        <div
+                          className="flex justify-center mt-4"
+                          style={{
+                            backgroundColor: "black",
+                            color: "white",
+                            borderRadius: "20px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            marginBottom: "30px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          <button className="btn btn-dark btn-sm rounded-pill d-flex align-items-center fw-bold">
+                            🌤 {aiRecommendation.weather.temperature}°C
+                          </button>
+                        </div>
+                        <div
+                          className="flex justify-center mt-4"
+                          style={{
+                            backgroundColor: "#FF8c00",
+                            color: "white",
+                            fontWeight: "bold",
+                            borderRadius: "20px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            marginBottom: "30px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
+                          }}
+                        >
+                          <button className="btn btn-sm rounded-pill d-flex align-items-center fw-bold text-white">
+                            <i
+                              className="bi bi-battery-half"
+                              style={{ fontWeight: "bold", fontSize: "25px" }}
+                              aria-hidden="true"
+                            ></i>
+                            &nbsp;70%
+                          </button>
+                        </div>
+                      </>
                     )}
-     
+
                     {/* </div> */}
 
                     {/* Weather Conditions */}
-                  
                   </div>
                   <div style={{ display: "flex", gap: "15px" }}>
                     {/* AI Recommendation */}
@@ -616,8 +620,6 @@ const HeroBanner = () => {
                           boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
                         }}
                       >
-              
-
                         <h5
                           style={{
                             fontSize: "18px",
