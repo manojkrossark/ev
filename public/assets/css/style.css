@@ -2338,7 +2338,7 @@ iframe {
   pointer-events: none;
   transition: transform 0.25s;
   transform-origin: 50% 50%;
-  background: #fff;
+   /* background: #fff; */
 }
 .theme-main-menu .navbar-toggler span {
   position: absolute;
