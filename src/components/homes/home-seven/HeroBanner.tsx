@@ -676,7 +676,7 @@ const HeroBanner = () => {
                                 display: "flex",
                                 justifyContent: "center",
                                 alignItems: "center",
-                                fontSize: "14px",
+                                fontSize: "16px",
                                 fontWeight: "bold",
                                 boxShadow: "0px 2px 6px rgba(0,0,0,0.3)",
                               }}
@@ -699,7 +699,7 @@ const HeroBanner = () => {
                             </h6>
 
                         <p style={{ fontSize: "16px", color: "#333" }}>
-                         Location: {station.location}
+                         Location: {station.address}
                         </p>
                         <p style={{ fontSize: "20px", color: "#333" ,fontWeight:"bold" }}>
                                ₹{station.price_per_kwh} /kWh
