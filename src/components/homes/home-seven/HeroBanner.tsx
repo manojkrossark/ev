@@ -312,7 +312,7 @@ const HeroBanner = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */125
+  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
   display: flex;
   flex-direction: column;
   justify-content: center;
