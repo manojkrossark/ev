@@ -216,7 +216,7 @@ const HeroBanner = () => {
     });
   };
   return (
-    <div className="hero-banner-seven position-relative mt-120 lg-mt-100">
+    <div className="hero-banner-seven position-relative">
       <style>
         {`
           .search-container {
