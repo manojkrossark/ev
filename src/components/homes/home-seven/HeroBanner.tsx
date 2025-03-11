@@ -701,7 +701,7 @@ const HeroBanner = () => {
                               📍 Location: {station.address}
                             </p>
                             <p style={{ fontSize: "30px", color: "#333" }}>
-                               ₹{station.price_per_kwh}/ kWh
+                               ₹{station.price_per_kwh} /kWh
                             </p>
                             <p style={{ fontSize: "14px", color: "#333" }}>
                               🚗 Distance: {station.user_distance_km} km
