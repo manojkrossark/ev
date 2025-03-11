@@ -343,7 +343,7 @@ const HeroBanner = () => {
       {isLoading && (
         <div className="loading-overlay">
           <Image
-            src="/ev-charger-logo.webp"
+            src="/Charging Stations.png"
             alt="EV Charging"
             className="ev-charger-loader"
             width={80}
