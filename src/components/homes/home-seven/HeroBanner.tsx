@@ -346,8 +346,8 @@ const HeroBanner = () => {
             src="/Charging Stations.png"
             alt="EV Charging"
             className="ev-charger-loader"
-            width={80}
-            height={80}
+            width={40}
+            height={40}
           />
           <p className="loading-text">Fetching your location, please wait...</p>
         </div>
