@@ -57,11 +57,12 @@ const HeaderOne = ({ style }: any) => {
               <nav className="navbar navbar-expand-lg p0 order-lg-2">
                 <button
                   className="navbar-toggler d-block d-lg-none"
+                  style={{ color: "white" }}
                   type="button"
                   onClick={() => window.location.reload()} // Refresh the page on click
                   aria-label="Refresh page"
                 >
-                  <i className="fas fa-sync-alt"></i>{" "}
+                  <i className="fas fa-location-crosshairs"></i>{" "}
                   {/* Font Awesome Refresh Icon */}
                 </button>
                 {/* <div className="collapse navbar-collapse" id="navbarNav">
