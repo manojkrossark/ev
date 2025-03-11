@@ -24,7 +24,7 @@ const HeaderOne = ({ style }: any) => {
             <div className="d-flex align-items-center justify-content-between">
               <div className="logo order-lg-0">
                 <Link href="/" className="d-flex align-items-center">
-                  <Image src={logo_1} alt="" />
+                  <Image src={logo_1}  width={60} alt="" />
                 </Link>
               </div>
               <div className="right-widget ms-auto ms-lg-0 me-3 me-lg-0 order-lg-3">
