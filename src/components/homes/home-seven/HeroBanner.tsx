@@ -698,16 +698,16 @@ const HeroBanner = () => {
                                 .trim()}
                             </h6>
 
-                        <p style={{ fontSize: "16px", color: "#333" }}>
+                        <p style={{ fontSize: "14px", color: "#333" }}>
                          Location: {station.address}
                         </p>
-                        <p style={{ fontSize: "20px", color: "#333" ,fontWeight:"bold" }}>
-                               ₹{station.price_per_kwh} /kWh
+                        <p style={{ fontSize: "18px", color: "#333" ,fontWeight:"bold" }}>
+                               ₹{station.price_per_kwh}/kWh
                             </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
+                        <p style={{ fontSize: "14px", color: "#333" }}>
                         <b><i className="bi bi-geo-alt"></i></b>Distance: {station.user_distance_km} km
                         </p>
-                        <p style={{ fontSize: "16px", color: "#333" }}>
+                        <p style={{ fontSize: "14px", color: "#333" }}>
                          <b><i className="bi bi-alarm"></i></b> Travel Time: {station.estimated_travel_time_min}{" "}
                           mins
                         </p>
