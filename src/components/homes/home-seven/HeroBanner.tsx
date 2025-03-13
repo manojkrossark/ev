@@ -340,11 +340,11 @@ const HeroBanner = () => {
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Location Permission Needed</h2>
+            <h5>Location Permission Needed</h5>
             <p>
               This app requires access to your location to function properly.
             </p>
-            <button onClick={requestLocation}>Allow Location</button>
+            <button onClick={requestLocation} style={{margin: auto}}>Allow Location</button>
             {error && <p className="error">{error}</p>}
           </div>
         </div>
