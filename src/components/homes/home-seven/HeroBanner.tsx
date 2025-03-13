@@ -17,10 +17,13 @@ import Image from "next/image";
 import dashboardIcon_1 from "@/assets/images/dashboard/icon/icon_43.svg";
 import loadingSpinner from "../../../../public/icons8-loading-48.png";
 import refreshIcon from "../../../../public/circular-arrow.png";
+
 const LIBRARIES: "places"[] = ["places"];
 
 const HeroBanner = () => {
   const API_URL = `${BASE_API_URL}api/allocate-charging`;
+  const API_URL_EV = `${BASE_API_URL}api/allocate-charging`; // EV Charging API
+  const API_URL_PETROL = `${BASE_API_URL}api/allocate-fuel`;
   const GOOGLE_MAPS_API_KEY = "AIzaSyDAUhNkL--7MVKHtlFuR3acwa7ED-cIoAU";
 
   const containerStyle = {
@@ -72,8 +75,52 @@ const HeroBanner = () => {
   >([]);
   const [selectedStation, setSelectedStation] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedStationType, setSelectedStationType] = useState("petrol");
+  const [showPopup, setShowPopup] = useState(false); // Default: Don't show popup
+  const [error, setError] = useState(""); // Default to EV stations
+
+  const handleStationTypeChange = (type) => {
+    setSelectedStationType(type);
+  };
+
+  // useEffect(() => {
+  //   navigator.geolocation.getCurrentPosition(
+  //     (position) => {
+  //       const userLocation = {
+  //         lat: position.coords.latitude,
+  //         lng: position.coords.longitude,
+  //       };
+  //       setLocation(userLocation);
+  //       setMapCenter(userLocation);
+  //       setZoom(14);
+  //     },
+  //     (error) => console.error("Error fetching location:", error),
+  //     { enableHighAccuracy: true }
+  //   );
+  // }, []);
 
   useEffect(() => {
+    // Check location permission status
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((permission) => {
+        if (permission.state === "granted") {
+          // If already allowed, get location immediately
+          requestLocation();
+        } else {
+          // Otherwise, show popup to request location
+          setShowPopup(true);
+        }
+      })
+      .catch(() => setShowPopup(true)); // In case of any errors, show popup
+  }, []);
+
+  const requestLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by this browser.");
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const userLocation = {
@@ -83,12 +130,17 @@ const HeroBanner = () => {
         setLocation(userLocation);
         setMapCenter(userLocation);
         setZoom(14);
+        setShowPopup(false); // Hide popup after getting location
       },
-      (error) => console.error("Error fetching location:", error),
-      { enableHighAccuracy: true }
+      (error) => {
+        setError(
+          "Location access denied. Please allow location in browser settings."
+        );
+        // setShowPopup(true); // Keep showing popup if access denied
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, []);
-
+  };
   const fetchCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -119,15 +171,53 @@ const HeroBanner = () => {
 
   useEffect(() => {
     if (location) {
-      allocateChargingSlot();
+      // allocateChargingSlot();
+      allocateStation();
     }
-  }, [location]);
+  }, [location, selectedStationType]);
 
-  const allocateChargingSlot = async () => {
+  // const allocateChargingSlot = async () => {
+  //   if (!location) return;
+  //   try {
+  //     setIsLoading(true);
+  //     setAiRecommendation(null);
+  //     const response = await axios.post(API_URL, {
+  //       latitude: location.lat,
+  //       longitude: location.lng,
+  //     });
+
+  //     console.log("API Response:", response.data);
+
+  //     setChargingStation(response.data.charging_station);
+  //     setAiRecommendation(response.data.ai_recommendation.recommendation);
+
+  //     if (response.data.charging_station.location) {
+  //       const [lat, lng] = response.data.charging_station.location
+  //         .split(", ")
+  //         .map(Number);
+  //       setMapCenter({ lat, lng });
+  //       setZoom(14);
+  //     }
+
+  //     getRoutesToTopStations(
+  //       response.data.ai_recommendation.recommendation.top_3_stations
+  //     );
+  //   } catch (error) {
+  //     console.error("Error fetching charging station:", error);
+  //   } finally {
+  //   }
+  //   setIsLoading(false);
+  // };
+
+  const allocateStation = async () => {
     if (!location) return;
+
+    const API_URL = selectedStationType === "ev" ? API_URL_EV : API_URL_PETROL;
+
     try {
       setIsLoading(true);
       setAiRecommendation(null);
+
       const response = await axios.post(API_URL, {
         latitude: location.lat,
         longitude: location.lng,
@@ -135,11 +225,11 @@ const HeroBanner = () => {
 
       console.log("API Response:", response.data);
 
-      setChargingStation(response.data.charging_station);
+      setChargingStation(response.data.station); // Now generic for EV & Petrol
       setAiRecommendation(response.data.ai_recommendation.recommendation);
 
-      if (response.data.charging_station.location) {
-        const [lat, lng] = response.data.charging_station.location
+      if (response.data.station.location) {
+        const [lat, lng] = response.data.station.location
           .split(", ")
           .map(Number);
         setMapCenter({ lat, lng });
@@ -150,10 +240,10 @@ const HeroBanner = () => {
         response.data.ai_recommendation.recommendation.top_3_stations
       );
     } catch (error) {
-      console.error("Error fetching charging station:", error);
+      console.error("Error fetching station:", error);
     } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handlePlaceSelect = () => {
@@ -215,131 +305,9 @@ const HeroBanner = () => {
       );
     });
   };
+
   return (
     <div className="hero-banner-seven position-relative">
-      <style>
-        {`
-          .search-container {
-            display: flex;
-            align-items: center;
-            background-color: white;
-            border-radius: 30px;
-            border: 1px solid #000; /* Black border */
-            padding: 10px 15px;
-            width: 100%;
-            max-width: 350px; /* Adjust as needed */
-          }
-
-          .search-input {
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 16px;
-            flex-grow: 1;
-            color: #666; /* Soft text color */
-          }
-
-          .search-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-          }
-
-          .search-icon {
-            width: 20px;
-            height: 20px;
-            opacity: 0.7;
-          }
-
-          .search-wrapper {
-            position: absolute;
-            top: 20px; /* Adjust spacing */
-            right: 20px; /* Aligns to the right */
-            display: flex;
-            justify-content: flex-end; /* Pushes it to the right */
-            width: auto;
-            z-index: 1000; /* Ensures it stays above the map */
-          }
-
-          .search-icon, .loading-icon {
-            width: 20px; /* Ensure size is proper */
-            height: 20px;
-            display: block; /* Ensure it's visible */
-          }
-
-          .refresh-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-}
-
-.refresh-icon {
-  width: 22px;
-  height: 22px;
-  opacity: 0.7;
-}
-
-.refresh-button:hover .refresh-icon {
-  opacity: 1;
-  transform: rotate(180deg);
-  transition: 0.3s;
-}
-
-          .loading-icon {
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-          }
-
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-
-          @media (max-width: 768px) {
-            .search-wrapper {
-          left: 35%;
-          transform: translateX(-50%);
-          right: auto;
-          width: 90%; /* Ensures it's wide enough */
-          max-width: 350px; /* Adjust if needed */
-  }
-          }
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999; /* Ensure it stays on top */
-}
-
-/* Pulsating Effect for the EV Charger Logo */
-.ev-charger-loader {
-  animation: pulse 1.5s infinite alternate;
-}
-
-@keyframes pulse {
-  0% { opacity: 0.5; } /* Dim */
-  100% { opacity: 1; } /* Bright */
-}
-
-/* Loading text */
-.loading-text {
-  margin-top: 15px;
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-}
-        `}
-      </style>
       {isLoading && (
         <div className="loading-overlay">
           <Image
@@ -350,6 +318,19 @@ const HeroBanner = () => {
             height={40}
           />
           <p className="loading-text">Fetching your location, please wait...</p>
+        </div>
+      )}
+
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Location Permission Needed</h2>
+            <p>
+              This app requires access to your location to function properly.
+            </p>
+            <button onClick={requestLocation}>Allow Location</button>
+            {error && <p className="error">{error}</p>}
+          </div>
         </div>
       )}
       <div id="" className="h-100">
@@ -368,6 +349,39 @@ const HeroBanner = () => {
             libraries={LIBRARIES}
           >
             <>
+              <div className="station-selection">
+                {/* Toggle Buttons for EV and Petrol */}
+                <div className="station-toggle">
+                  <button
+                    className={`toggle-button ${
+                      selectedStationType === "ev" ? "active" : ""
+                    }`}
+                    onClick={() => handleStationTypeChange("ev")}
+                    title="EV Charging Stations"
+                  >
+                    <i className="fa-solid fa-charging-station"></i>
+                  </button>
+
+                  <button
+                    className={`toggle-button ${
+                      selectedStationType === "petrol" ? "active" : ""
+                    }`}
+                    onClick={() => handleStationTypeChange("petrol")}
+                    title="Petrol Stations"
+                  >
+                    <i className="fa-solid fa-gas-pump"></i>
+                  </button>
+                </div>
+
+                {/* Map or List of Results */}
+                {/* <div className="station-results">
+                  {selectedStationType === "ev" ? (
+                    <p>Showing EV Charging Stations...</p>
+                  ) : (
+                    <p>Showing Petrol Stations...</p>
+                  )}
+                </div> */}
+              </div>
               <div className="search-wrapper">
                 <Autocomplete
                   onLoad={(auto) => (autocompleteRef.current = auto)}
@@ -399,18 +413,6 @@ const HeroBanner = () => {
                     </button>
                   </div>
                 </Autocomplete>
-                {/* <button
-                  type="button"
-                  className="refresh-button"
-                  onClick={fetchCurrentLocation}
-                  title="Refresh Location"
-                >
-                  <Image
-                    src={refreshIcon}
-                    alt="Refresh"
-                    className="refresh-icon"
-                  />
-                </button> */}
               </div>
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -610,7 +612,7 @@ const HeroBanner = () => {
                     {!isLoading && aiRecommendation && (
                       <div
                         style={{
-                          position: "relative", // To allow positioning for the temperature badge
+                          position: "relative",
                           width: "250px",
                           minWidth: "250px",
                           padding: "15px",
@@ -629,18 +631,44 @@ const HeroBanner = () => {
                         >
                           🤖 Alto Recommends
                         </h5>
-                        <p style={{ fontSize: "14px", color: "#333" }}>
-                          ⏳ Best Time:{" "}
-                          <span style={{ fontWeight: "bold", color: "black" }}>
-                            {aiRecommendation?.best_time_to_charge}
-                          </span>
-                        </p>
-                        <p style={{ fontSize: "14px", color: "#333" }}>
-                          🚦 Peak Hours:{" "}
-                          <span style={{ fontWeight: "bold", color: "black" }}>
-                            {aiRecommendation?.peak_hours?.join(", ")}
-                          </span>
-                        </p>
+
+                        {/* Show Best Time & Peak Hours (Handles both Petrol & EV) */}
+                        {(aiRecommendation.best_time_to_charge ||
+                          aiRecommendation.best_time_to_refuel) && (
+                          <>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              ⏳ Best Time:{" "}
+                              <span
+                                style={{ fontWeight: "bold", color: "black" }}
+                              >
+                                {aiRecommendation.best_time_to_charge ||
+                                  aiRecommendation.best_time_to_refuel}
+                              </span>
+                            </p>
+                            <p style={{ fontSize: "14px", color: "#333" }}>
+                              🚦 Peak Hours:{" "}
+                              <span
+                                style={{ fontWeight: "bold", color: "black" }}
+                              >
+                                {aiRecommendation.peak_hours?.join(", ") ||
+                                  "N/A"}
+                              </span>
+                            </p>
+                          </>
+                        )}
+
+                        {/* Show Weather Info (If Available) */}
+                        {/* {aiRecommendation.weather && (
+                          <p style={{ fontSize: "14px", color: "#333" }}>
+                            🌤 Weather:{" "}
+                            <span
+                              style={{ fontWeight: "bold", color: "black" }}
+                            >
+                              {aiRecommendation.weather.condition} (
+                              {aiRecommendation.weather.temperature}°C)
+                            </span>
+                          </p>
+                        )} */}
                       </div>
                     )}
 
@@ -650,7 +678,7 @@ const HeroBanner = () => {
                           <div
                             key={index}
                             style={{
-                              position: "relative", // Enables positioning for the index circle
+                              position: "relative",
                               width: "250px",
                               minWidth: "250px",
                               padding: "15px",
@@ -684,7 +712,7 @@ const HeroBanner = () => {
                               {index + 1}
                             </div>
 
-                            {/* Station Info */}
+                            {/* Station Name */}
                             <h6
                               style={{
                                 fontSize: "16px",
@@ -694,28 +722,71 @@ const HeroBanner = () => {
                               }}
                             >
                               {station.name
-                                .replace(/Charging Station/gi, "")
+                                .replace(
+                                  /(Charging Station|Petrol Pump|CNG Station)/gi,
+                                  ""
+                                )
                                 .trim()}
                             </h6>
 
-                        <p style={{ fontSize: "11px", color: "#333" }}>
-                         Location: {station.address}
-                        </p>
-                        <p style={{ fontSize: "16px", color: "#333" ,fontWeight:"bold" }}>
-                               ₹{station.price_per_kwh}/kWh
+                            {/* Address */}
+                            <p style={{ fontSize: "11px", color: "#333" }}>
+                              📍 {station.address}
                             </p>
-                        <p style={{ fontSize: "11px", color: "#333" ,lineHeight:"1rem"}}>
-                        <b><i className="bi bi-geo-alt"></i></b>Distance: {station.user_distance_km} km
-                        </p>
-                        <p style={{ fontSize: "11px", color: "#333",lineHeight:"1rem" }}>
-                         <b><i className="bi bi-alarm"></i></b> Travel Time: {station.estimated_travel_time_min}{" "}
-                          mins
-                        </p>
-                        </div>
+
+                            {/* Dynamic Pricing Display (Handles both Petrol & EV) */}
+                            {station.price_per_kwh ? (
+                              <p
+                                style={{
+                                  fontSize: "16px",
+                                  color: "#333",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                ⛽ ₹{station.price_per_kwh}/kWh
+                              </p>
+                            ) : (
+                              <p
+                                style={{
+                                  fontSize: "16px",
+                                  color: "#333",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                ⛽ ₹{station.fuel_price_per_litre}/L
+                              </p>
+                            )}
+
+                            {/* Distance & Travel Time */}
+                            <p
+                              style={{
+                                fontSize: "11px",
+                                color: "#333",
+                                lineHeight: "1rem",
+                              }}
+                            >
+                              <b>
+                                <i className="bi bi-geo-alt"></i>
+                              </b>
+                              Distance: {station.user_distance_km} km
+                            </p>
+                            <p
+                              style={{
+                                fontSize: "11px",
+                                color: "#333",
+                                lineHeight: "1rem",
+                              }}
+                            >
+                              <b>
+                                <i className="bi bi-alarm"></i>
+                              </b>{" "}
+                              Travel Time: {station.estimated_travel_time_min}{" "}
+                              mins
+                            </p>
+                          </div>
                         )
                       )}
                     {/* </div> */}
-
                     {/* Weather Conditions */}
                     {/* {aiRecommendation?.weather && (
                       <div
