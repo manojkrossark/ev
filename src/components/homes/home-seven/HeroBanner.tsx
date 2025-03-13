@@ -344,7 +344,7 @@ const HeroBanner = () => {
             <p>
               This app requires access to your location to function properly.
             </p>
-            <button onClick={requestLocation} style={{margin: auto}}>Allow Location</button>
+            <button onClick={requestLocation} style={{margin: "auto"}}>Allow Location</button>
             {error && <p className="error">{error}</p>}
           </div>
         </div>
