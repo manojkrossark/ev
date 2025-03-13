@@ -813,8 +813,9 @@ const HeroBanner = () => {
                                 style={{
                                   fontSize: "20px",
                                   backgroundColor: "#FF6725",
-                                  padding: "5px",
+                                  padding: "10px",
                                   borderRadius: "20px",
+                                  color:"#fff"
                                 }}
                               ></i>
                             </div>
