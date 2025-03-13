@@ -246,6 +246,22 @@ const HeroBanner = () => {
     }
   };
 
+  const openGoogleMaps = (stationLocation) => {
+    if (!location) {
+      alert("Please enable location access to get directions.");
+      return;
+    }
+
+    const userLat = location.lat;
+    const userLng = location.lng;
+
+    const [stationLat, stationLng] = stationLocation?.split(",").map(Number);
+
+    const googleMapsUrl = `https://www.google.com/maps/dir/${userLat},${userLng}/${stationLat},${stationLng}`;
+
+    window.open(googleMapsUrl, "_blank");
+  };
+
   const handlePlaceSelect = () => {
     if (!autocompleteRef.current) return;
     const place = autocompleteRef.current.getPlace();
@@ -783,6 +799,25 @@ const HeroBanner = () => {
                               Travel Time: {station.estimated_travel_time_min}{" "}
                               mins
                             </p>
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: "10px",
+                                right: "10px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => openGoogleMaps(station.location)}
+                            >
+                              <i
+                                className="fa-light fa-diamond-turn-right"
+                                style={{
+                                  fontSize: "20px",
+                                  backgroundColor: "#FF6725",
+                                  padding: "5px",
+                                  borderRadius: "20px",
+                                }}
+                              ></i>
+                            </div>
                           </div>
                         )
                       )}
